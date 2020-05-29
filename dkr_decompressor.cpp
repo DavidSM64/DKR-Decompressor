@@ -140,11 +140,18 @@ std::vector<u8> compress(std::string inputFile)
     //std::cout << inputFile << std::endl;
     std::vector<u8> compressed;
     
+    int gzipStatus = 0;
+    
 #if defined(_WIN32) || defined(_WIN64) // Windows
-    system(("gzip.exe -f -q -9 -k " + inputFile).c_str());
+    gzipStatus = system(("gzip.exe -f -q -9 -k " + inputFile).c_str());
 #else // Linux
-    system(("gzip -f -q -9 -k " + inputFile).c_str());
+    gzipStatus = system(("gzip -f -q -9 -k " + inputFile).c_str());
 #endif
+
+    if(gzipStatus != 0) {
+        std::cout << "Error: Either gzip is not installed or some error has occured" << std::endl;
+        throw gzipStatus;
+    }
     
     std::vector<u8> compressedData;
     readBinaryFile(compressedData, inputFile + ".gz");
