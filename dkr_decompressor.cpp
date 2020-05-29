@@ -88,6 +88,12 @@ struct TableOffsetEntry {
 
 void DecompressZLibFromTable(std::string inputFilename, std::string outputDirectory) 
 {
+    fs::path filePath = fs::path(inputFilename);
+    if(!fs::is_regular_file(filePath)) {
+        std::cout << inputFilename << " is not a file!" << std::endl;
+        return;
+    }
+    
     std::vector<u8> input;
     
     if(readBinaryFile(input, inputFilename)) {
@@ -129,7 +135,7 @@ void DecompressZLibFromTable(std::string inputFilename, std::string outputDirect
                 << std::dec;
             DecompressZLibSpot(compressed, dataSegment, outputFilename.str());
         }
-
+        std::cout << "Finished decompressing to directory \"" << outputDirectory << "\"" << std::endl;
     } else {
         std::cout << "Could not read file: " << inputFilename << std::endl;
     }
@@ -241,6 +247,7 @@ void compressDirectory(std::string inputDirectory, std::string outputFilename)
     }
     
     writeBinaryFile(&outFile[0], outFile.size(), outputFilename);
+    std::cout << "Finished compressing to file \"" << outputFilename << "\"" << std::endl;
 }
 
 int main(int argc, char *argv[]) 
@@ -258,12 +265,10 @@ int main(int argc, char *argv[])
         std::string outputDir = std::string(argv[3]);
         fs::create_directories(fs::path(outputDir));
         DecompressZLibFromTable(inputFilename, outputDir);
-        std::cout << "Finished decompressing to directory \"" << outputDir << "\"" << std::endl;
     } else if (option == "-c") {
         std::string inputDirectory = std::string(argv[2]);
         std::string outputFilename = std::string(argv[3]);
         compressDirectory(inputDirectory, outputFilename);
-        std::cout << "Finished compressing to file \"" << outputFilename << "\"" << std::endl;
     } else {
         printHelp();
         return 1;
