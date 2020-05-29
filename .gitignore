@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!dkr_decompressor.cpp
+!GECompression.cpp
+!GECompression.h
+!Makefile
+!gzip.exe
