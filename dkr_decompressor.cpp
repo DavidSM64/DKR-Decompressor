@@ -20,8 +20,13 @@ void printHelp()
 {
     std::cout 
     << "---- Usage ----" << std::endl
-    << " Decompress: ./dkr_decompressor -c <input_directory> <out_filename>" << std::endl
-    << " Compress:   ./dkr_decompressor -d <input_filename> <out_directory>" << std::endl;
+    << " Compress file: ./dkr_decompressor -c <input_filename> <output_filename>" << std::endl
+    << " Decompress file:   ./dkr_decompressor -d <input_filename> <output_filename>" << std::endl
+    /*
+    << " Compress table: ./dkr_decompressor -tc <input_directory> <output_data_filename> <output_table_filename>" << std::endl
+    << " Decompress table:   ./dkr_decompressor -td <input_data_filename> <input_table_filename> <output_directory>" << std::endl
+    */
+    ;
 }
 
 bool readBinaryFile(std::vector<u8>& input, std::string filename)
@@ -81,22 +86,41 @@ void DecompressZLibSpot(GECompression& compressed, std::vector<u8>& segment, std
     }
 }
 
-struct TableOffsetEntry {
+void DecompressZLibFile(std::string inputFilename, std::string outputFilename)
+{
+    GECompression compressed;
+    compressed.SetGame(DKR);
+    
+    std::vector<u8> inputData;
+    readBinaryFile(inputData, inputFilename);
+    
+    DecompressZLibSpot(compressed, inputData, outputFilename);
+}
+
+struct TableOffsetEntry 
+{
     int start;
     int size;
 };
 
-void DecompressZLibFromTable(std::string inputFilename, std::string outputDirectory) 
+// DecompressZLibFromTable(inputDataFilename, inputTableFilename, outputDir);
+void DecompressZLibFromTable(std::string inputDataFilename, std::string inputTableFilename, std::string outputDirectory) 
 {
-    fs::path filePath = fs::path(inputFilename);
-    if(!fs::is_regular_file(filePath)) {
-        std::cout << inputFilename << " is not a file!" << std::endl;
+    fs::path fileDataPath = fs::path(inputDataFilename);
+    fs::path fileTablePath = fs::path(inputTableFilename);
+    if(!fs::is_regular_file(fileDataPath)) {
+        std::cout << inputDataFilename << " is not a file!" << std::endl;
+        return;
+    }
+    if(!fs::is_regular_file(fileTablePath)) {
+        std::cout << inputTableFilename << " is not a file!" << std::endl;
         return;
     }
     
-    std::vector<u8> input;
+    std::vector<u8> inputData;
+    std::vector<u8> inputTable;
     
-    if(readBinaryFile(input, inputFilename)) {
+    if(readBinaryFile(inputData, inputDataFilename) && readBinaryFile(inputTable, inputTableFilename)) {
         std::vector<TableOffsetEntry> tableOffsets;
         GECompression compressed;
         compressed.SetGame(DKR);
@@ -105,8 +129,8 @@ void DecompressZLibFromTable(std::string inputFilename, std::string outputDirect
         int offset = 0;
         while (true)
         {
-            int tableOffset = bytes_to_uint_be(input, offset);
-            int nextTableOffset = bytes_to_uint_be(input, offset + 4);
+            int tableOffset = bytes_to_uint_be(inputTable, offset);
+            int nextTableOffset = bytes_to_uint_be(inputTable, offset + 4);
             
             if(nextTableOffset == 0xFFFFFFFF)
             {
@@ -123,12 +147,11 @@ void DecompressZLibFromTable(std::string inputFilename, std::string outputDirect
             
             offset += 4;
         }
-        int dataStartOffset = (offset + 0x10) & 0xFFFFFFF0;
         
         for(size_t i = 0; i < tableOffsets.size(); i++) {
             int size = tableOffsets[i].size;
             
-            std::vector<u8> dataSegment = getSubsection(input, dataStartOffset + tableOffsets[i].start, tableOffsets[i].size);
+            std::vector<u8> dataSegment = getSubsection(inputData, tableOffsets[i].start, tableOffsets[i].size);
             std::ostringstream outputFilename;
             outputFilename << outputDirectory << "/" << std::hex << std::fixed 
                 << std::setw(6) << std::setfill('0') << tableOffsets[i].start
@@ -137,7 +160,7 @@ void DecompressZLibFromTable(std::string inputFilename, std::string outputDirect
         }
         std::cout << "Finished decompressing to directory \"" << outputDirectory << "\"" << std::endl;
     } else {
-        std::cout << "Could not read file: " << inputFilename << std::endl;
+        std::cout << "Could not read files: " << inputDataFilename << ", " << inputTableFilename << std::endl;
     }
 }
 
@@ -252,7 +275,7 @@ void compressDirectory(std::string inputDirectory, std::string outputFilename)
 
 int main(int argc, char *argv[]) 
 {
-    if(argc != 4) 
+    if(argc == 1) 
     {
         printHelp();
         return 1;
@@ -260,19 +283,47 @@ int main(int argc, char *argv[])
     
     std::string option = std::string(argv[1]);
     
-    if (option == "-d") {
-        std::string inputFilename = std::string(argv[2]);
-        std::string outputDir = std::string(argv[3]);
-        fs::create_directories(fs::path(outputDir));
-        DecompressZLibFromTable(inputFilename, outputDir);
-    } else if (option == "-c") {
-        std::string inputDirectory = std::string(argv[2]);
-        std::string outputFilename = std::string(argv[3]);
-        compressDirectory(inputDirectory, outputFilename);
-    } else {
+    bool fileOptionCheck = ((option == "-d" || option == "-c") && argc != 4);
+    //bool tableOptionCheck = ((option == "-td" || option == "-tc") && argc != 5);
+    bool invalidOptionCheck = (option != "-d" && option != "-c" && option != "td" && option != "tc");
+    
+    if(fileOptionCheck /*|| tableOptionCheck*/ || invalidOptionCheck) 
+    {
         printHelp();
         return 1;
     }
     
+    /*
+    if (option == "-td") {
+        std::string inputDataFilename = std::string(argv[2]);
+        std::string inputTableFilename = std::string(argv[3]);
+        std::string outputDir = std::string(argv[4]);
+        fs::create_directories(fs::path(outputDir));
+        DecompressZLibFromTable(inputDataFilename, inputTableFilename, outputDir);
+    } else if (option == "-tc") {
+        std::string inputDirectory = std::string(argv[2]);
+        std::string outputDataFilename = std::string(argv[3]);
+        std::string outputTableFilename = std::string(argv[4]);
+        //compressDirectory(inputDirectory, outputDataFilename, outputTableFilename);
+    } else 
+    */
+    if (option == "-c") 
+    {
+        std::string inputFile = std::string(argv[2]);
+        std::string outputFile = std::string(argv[3]);
+        std::vector<u8> compressedFile = compress(inputFile);
+        writeBinaryFile(&compressedFile[0], compressedFile.size(), outputFile);
+    } 
+    else if (option == "-d") 
+    {
+        std::string inputFile = std::string(argv[2]);
+        std::string outputFile = std::string(argv[3]);
+        DecompressZLibFile(inputFile, outputFile);
+    }
+    
     return 0;
 }
+
+
+
+

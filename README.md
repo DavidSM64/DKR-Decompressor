@@ -8,10 +8,10 @@ If you are using linux, then the `gzip` package will need to be installed for co
 
 ## Usage
 
-#### Decompressing a data block to a directory
+#### Decompressing a file
 
-`./dkr_decompressor -d <input_filename> <out_directory>`
+`./dkr_decompressor -d <input_filename> <output_filename>`
 
-#### Compressing a directory into a data block
+#### Compressing a file
 
-`./dkr_decompressor -c <input_directory> <out_filename>`
+`./dkr_decompressor -c <input_filename> <output_filename>`
