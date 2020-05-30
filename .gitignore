@@ -6,6 +6,8 @@
 !dkr_decompressor.cpp
 !GECompression.cpp
 !GECompression.h
+!DKRCompression.cpp
+!DKRCompression.h
 !Makefile
 !gzip.exe
 !LICENSE
