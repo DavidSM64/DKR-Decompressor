@@ -97,13 +97,13 @@ void DecompressZLibFile(std::string inputFilename, std::string outputFilename)
     DecompressZLibSpot(compressed, inputData, outputFilename);
 }
 
+/*
 struct TableOffsetEntry 
 {
     int start;
     int size;
 };
 
-// DecompressZLibFromTable(inputDataFilename, inputTableFilename, outputDir);
 void DecompressZLibFromTable(std::string inputDataFilename, std::string inputTableFilename, std::string outputDirectory) 
 {
     fs::path fileDataPath = fs::path(inputDataFilename);
@@ -163,6 +163,7 @@ void DecompressZLibFromTable(std::string inputDataFilename, std::string inputTab
         std::cout << "Could not read files: " << inputDataFilename << ", " << inputTableFilename << std::endl;
     }
 }
+*/
 
 std::vector<u8> compress(std::string inputFile)
 {
@@ -222,6 +223,7 @@ std::vector<u8> compress(std::string inputFile)
     return dkr_compressed;
 }
 
+/*
 void pushInt(std::vector<u8>& vec, int value)
 {
     vec.push_back((value & 0xFF000000) >> 24);
@@ -272,6 +274,7 @@ void compressDirectory(std::string inputDirectory, std::string outputFilename)
     writeBinaryFile(&outFile[0], outFile.size(), outputFilename);
     std::cout << "Finished compressing to file \"" << outputFilename << "\"" << std::endl;
 }
+*/
 
 int main(int argc, char *argv[]) 
 {
