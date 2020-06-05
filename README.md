@@ -20,6 +20,8 @@ This is a command-line tool used for compressing and decompressing assets from t
 
 In DKR, a compressed block has a 5 byte header. The first 4 bytes is the uncompressed size in little-endian and the fifth byte is `0x09`, which I think is the gzip compression level.
 
+Here are the ROM offsets for the compressed data in US version 1.0  
+  
 | Files | Look-up table | Start offset | End offset |
 | ------------- | ------------- | ------------ | ---------- |
 | Textures | 0x296CA0 | 0x0ECD50 | 0x296CA0 |
