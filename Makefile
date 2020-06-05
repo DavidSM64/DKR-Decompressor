@@ -1,6 +1,6 @@
 CXX := g++
 
-dkr_decompressor_SOURCES  := dkr_decompressor.cpp DKRCompression.cpp GECompression.cpp
+dkr_decompressor_SOURCES  := dkr_decompressor.cpp DKRCompression.cpp GECompression.cpp DKRGzip.c
 dkr_decompressor_CXXFLAGS := -lstdc++fs
 
 all: dkr_decompressor

@@ -11,34 +11,18 @@ DKRCompression::~DKRCompression(void)
 
 std::vector<uint8_t> DKRCompression::compressBuffer(std::vector<uint8_t> data) 
 {
-    writeBinaryFile(data, "__temp.dkr.bin");
+    int uncompressedSize = data.size();
+    int compressedSize = 0;
     
-    std::vector<uint8_t> compressed;
+    uint8_t* compressed = dkr_gzip_compress(&data[0], uncompressedSize, 9, &compressedSize);
     
-    int gzipStatus = 0;
-    
-#if defined(_WIN32) || defined(_WIN64) // Windows
-    gzipStatus = system(WINDOWS_GZIP + " -fnq9 __temp.dkr.bin");
-#else // Linux
-    gzipStatus = system("gzip -fnq9 __temp.dkr.bin");
-#endif
-
-    if(gzipStatus != 0) {
-        std::cout << "Error: Either gzip is not installed or some error has occured" << std::endl;
-        throw gzipStatus;
-    }
-    
-    std::vector<uint8_t> compressedData;
-    readBinaryFile(compressedData, "__temp.dkr.bin.gz");
-    fs::remove(fs::path("__temp.dkr.bin.gz"));
-    
-    std::vector<uint8_t> dkr_compressed = getSubsection(compressedData, 10, compressedData.size() - 10 - 8);
+    std::vector<uint8_t> dkr_compressed(compressed + 10, compressed + compressedSize - 8);
     
     dkr_compressed.insert(dkr_compressed.begin(), 0x09); // gzip compression level?
-    dkr_compressed.insert(dkr_compressed.begin(), compressedData[compressedData.size() - 1]);
-    dkr_compressed.insert(dkr_compressed.begin(), compressedData[compressedData.size() - 2]);
-    dkr_compressed.insert(dkr_compressed.begin(), compressedData[compressedData.size() - 3]);
-    dkr_compressed.insert(dkr_compressed.begin(), compressedData[compressedData.size() - 4]);
+    dkr_compressed.insert(dkr_compressed.begin(), (uncompressedSize >> 24) & 0xFF);
+    dkr_compressed.insert(dkr_compressed.begin(), (uncompressedSize >> 16) & 0xFF);
+    dkr_compressed.insert(dkr_compressed.begin(), (uncompressedSize >> 8) & 0xFF);
+    dkr_compressed.insert(dkr_compressed.begin(), uncompressedSize & 0xFF);
     
     while((dkr_compressed.size() & 0xF) != 0) {
         dkr_compressed.push_back(0); // Pad out compressed file to be 16-byte aligned.

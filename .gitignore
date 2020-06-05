@@ -8,7 +8,8 @@
 !GECompression.h
 !DKRCompression.cpp
 !DKRCompression.h
+!DKRGzip.c
+!DKRGzip.h
 !Makefile
-!gzip.exe
 !LICENSE
 !README.md

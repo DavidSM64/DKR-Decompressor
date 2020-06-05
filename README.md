@@ -2,8 +2,6 @@
 
 This is a command-line tool used for compressing and decompressing assets from the N64 game "Diddy Kong Racing". This tool was designed to be used in the DKR decompilation project, but feel free to use it for whatever you want.
 
-If you are using linux, then the `gzip` package will need to be installed for compressing data. Windows users use the provided `gzip.exe`.
-
 ---
 
 ## Tool Usage
@@ -27,6 +25,8 @@ Required files:
 * GECompression.cpp
 * DKRCompression.h
 * DKRCompression.cpp
+* DKRGZip.h
+* DKRGZip.cpp
 
 The main file you want to include is `DKRCompression.h`. It is a class that contains 4 public functions.
 

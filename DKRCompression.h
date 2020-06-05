@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdint>
 #include "GECompression.h"
+#include "DKRGzip.h"
 
 // C++17
 #include <experimental/filesystem> 
