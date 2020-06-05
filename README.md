@@ -13,6 +13,10 @@ This is a command-line tool used for compressing and decompressing assets from t
 #### Compressing a file
 
 `./dkr_decompressor -c <input_filename> <output_filename>`
+  
+### What does a compressed file look like?
+
+In DKR, a compressed block has a 5 byte header. The first 4 bytes is the uncompressed size in little-endian and the fifth byte is `0x09`, which I think is the gzip compression level.
 
 ---
 
