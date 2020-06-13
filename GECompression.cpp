@@ -1,5 +1,5 @@
 //#include "StdAfx.h"
-#include "gecompression.h"
+#include "GECompression.h"
 #include <math.h>
 
 #define TABLE1 0
