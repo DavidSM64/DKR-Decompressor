@@ -14,6 +14,10 @@ This is a command-line tool used for compressing and decompressing assets from t
 
 `./dkr_decompressor -c <input_filename> <output_filename>`
 
+#### Decompressing a section from a ROM file
+
+`./dkr_decompressor -r <rom_filename> <output_filename> <rom_offset> <length>`
+
 ---
 
 ### What does a compressed file look like?

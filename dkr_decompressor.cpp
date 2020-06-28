@@ -12,7 +12,8 @@ void printHelp()
     std::cout 
     << "---- Usage ----" << std::endl
     << " Compress file: ./dkr_decompressor -c <input_filename> <output_filename>" << std::endl
-    << " Decompress file:   ./dkr_decompressor -d <input_filename> <output_filename>" << std::endl;
+    << " Decompress file: ./dkr_decompressor -d <input_filename> <output_filename>" << std::endl
+    << " Decompress section from a ROM file: ./dkr_decompressor -r <rom_filename> <output_filename> <rom_offset> <length>" << std::endl;
 }
 
 int main(int argc, char *argv[]) 
@@ -27,14 +28,14 @@ int main(int argc, char *argv[])
     std::string option = std::string(argv[1]);
     
     bool fileOptionCheck = ((option == "-d" || option == "-c") && argc != 4);
-    bool invalidOptionCheck = (option != "-d" && option != "-c");
+    bool romOptionCheck = ((option == "-r") && argc != 6);
+    bool invalidOptionCheck = (option != "-d" && option != "-c" && option != "-r");
     
-    if(fileOptionCheck || invalidOptionCheck) 
+    if(fileOptionCheck || romOptionCheck || invalidOptionCheck) 
     {
         printHelp();
         return 1;
     }
-    
     
     DKRCompression compression;
     
@@ -51,6 +52,15 @@ int main(int argc, char *argv[])
         else if (option == "-d") 
         {
             outputBinary = compression.decompressBuffer(inputBinary);
+        }
+        else if (option == "-r") 
+        {
+            int romOffset = std::stol(std::string(argv[4]), 0, 16);
+            int length = std::stol(std::string(argv[5]), 0, 16);
+            
+            std::vector<uint8_t> subsection(inputBinary.begin() + romOffset, inputBinary.begin() + romOffset + length);
+            
+            outputBinary = compression.decompressBuffer(subsection);
         }
         
         compression.writeBinaryFile(outputBinary, outputFilename);
